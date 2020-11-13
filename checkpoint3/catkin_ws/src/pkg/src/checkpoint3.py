@@ -17,10 +17,14 @@ class Control(object):
         self.last_led=-1000
         self.last_action=None
         self.now_action=None
+        self.state="NoGoal"
+        self.find_time=0
+
 
         self.sub_led = rospy.Subscriber("pub_led", Int32, self.cb_led, queue_size=1)
         self.pub_int = rospy.Publisher("array", Int32, queue_size=1)
         self.timer = rospy.Timer(rospy.Duration(0.2), self.control_loop)
+
         print("init done")
 
 
@@ -53,7 +57,16 @@ class Control(object):
         my_input7 = wiringpi.digitalRead(7)
         my_input8 = wiringpi.digitalRead(8)
         my_input9 = wiringpi.digitalRead(9)
-        print(self.led,my_input7,my_input8,my_input9)
+        if self.led<150:
+            self.state=="NearGaol"
+        if self.led<100:
+            self.state=="FindGaol"
+            self.find_time=0
+        else:
+            self.state=="NoGaol"
+            self.find_time=0
+
+        print(self.led,my_input7,my_input8,my_input9,self.state)
 
         if my_input9==1:
             if my_input7==0 and my_input8==0:
@@ -72,7 +85,7 @@ class Control(object):
                     self.back()
                     time.sleep(0.5)
                     self.left()
-                    time.sleep(2)
+                    time.sleep(1.5)
 
             if my_input7==0 and my_input8==1:
                 self.now_action="right"
@@ -80,27 +93,32 @@ class Control(object):
                     self.back()
                     time.sleep(0.5)
                     self.right()
-                    time.sleep(2)
+                    time.sleep(1.5)
 
-            if my_input7==1 and my_input8==1:
-                if self.last_led - self.led< -50:
-                    tmp=random.random()
-                    if tmp>0.5:
-                        self.now_action="right"
-                        if not self.now_action==self.last_action:
-                            self.right()
-                    else:
-                        self.now_action="left"
-                        if not self.now_action==self.last_action:
+            if my_input7==1 and my_input8==1: #free
+
+                if self.state=="NearGoal":
+                    
+                    if self.find_time<30: #finding
+                        if self.find_time <10:
+                            self.now_action="left"
                             self.left()
+                        else :
+                            self.now_action="right"
+                            self.right()
+                        self.find_time=self.find_time+1
+
+                        time.sleep(0.1)
+                    else: #finish finding
+                        self.find_time=0
+
                 else:
                     self.now_action="advance"
                     self.advance()
 
-        else :
+        else : # my_input9==0 ,have catched the ball
             self.now_action="stop"
-            if not self.now_action==self.last_action:
-                self.stop()
+            self.stop()
 
         print(self.now_action)
         self.last_led=self.led
