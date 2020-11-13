@@ -102,16 +102,18 @@ class Control(object):
             if self.time==10:
                 self.now_action=self.next_action
                 self.next_action=None
+            if self.time<0:
+                self.state="NoGoal"
+                self.time=0
             
 
         if self.state=="NearGoal":
             if self.time==20:
                 self.now_action=self.next_action
                 self.next_action=None
-        
-        if self.time<0:
-            self.state="NoGoal"
-            self.time=0
+            if self.time<0:
+                self.state="NoGoal"
+                self.time=0
 
 
         if self.state=="FindGoal":
