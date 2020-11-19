@@ -79,11 +79,11 @@ class Control(object):
         if my_input7==1 and my_input8==1 and my_input9==1: #free
             # if self.state!="Modify":
                 #for LED sensor
-            if self.led<=600:
+            if self.led<=650:
                 print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!FindGoal!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1!!!!")
                 self.state="FindGoal"
 
-            elif self.led<=690 and self.led>600 and self.state!="Modify":
+            elif self.led<=650 and self.led>600 and self.state!="Modify":
                 print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~NearGoal~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
                 if self.state!="NearGoal":
                     self.time=40
