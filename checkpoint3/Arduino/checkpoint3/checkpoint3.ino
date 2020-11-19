@@ -42,26 +42,26 @@ void num(const std_msgs::Int32& msg){
 
    if (msg.data==1){
       MODE=1;
-      Setpointleft=150;
-      Setpointright=150;
+      Setpointleft=255;
+      Setpointright=255;
    }
    if (msg.data==2){
-      MODE=1;
-      Setpointleft=0;
-      Setpointright=150;
+      MODE=2;
+      Setpointleft=100;
+      Setpointright=100;
    }
    if (msg.data==3){
-      MODE=1;
-      Setpointleft=150;
-      Setpointright=0;
+      MODE=3;
+      Setpointleft=100;
+      Setpointright=100;
    }
    if (msg.data==4){
-      MODE=0;
-      Setpointleft=150;
-      Setpointright=150;
+      MODE=4;
+      Setpointleft=255;
+      Setpointright=255;
    }
    if (msg.data==5){
-      MODE=2;
+      MODE=5;
       Setpointleft=0;
       Setpointright=0;
    }
@@ -108,8 +108,10 @@ void loop()
       pub_led.publish( &led );
 
       if(MODE==1){advance();}//Motor Forward
-      if(MODE==0){back();}
-      if(MODE==2){Stop();}
+      if(MODE==2){right();}
+      if(MODE==3){left();}
+      if(MODE==4){back();}
+      if(MODE==5){Stop();}
       abs_durationright=abs(durationright);
       resultright=rightPID.Compute();//PID conversion is complete and returns 1
       if(resultright)
@@ -181,6 +183,24 @@ void advance()//Motor Forward
 {
      digitalWrite(in1,HIGH);
      digitalWrite(in2,LOW);
+     analogWrite(ena,val_outputright);
+     digitalWrite(in3,HIGH);
+     digitalWrite(in4,LOW);
+     analogWrite(enb,val_outputleft);
+}
+void right()//Motor Forward
+{
+     digitalWrite(in1,HIGH);
+     digitalWrite(in2,LOW);
+     analogWrite(ena,val_outputright);
+     digitalWrite(in3,LOW);
+     digitalWrite(in4,HIGH);
+     analogWrite(enb,val_outputleft);
+}
+void left()//Motor Forward
+{
+     digitalWrite(in1,LOW);
+     digitalWrite(in2,HIGH);
      analogWrite(ena,val_outputright);
      digitalWrite(in3,HIGH);
      digitalWrite(in4,LOW);
