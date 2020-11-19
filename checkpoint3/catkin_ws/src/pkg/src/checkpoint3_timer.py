@@ -77,19 +77,24 @@ class Control(object):
             self.time=20
 
         if my_input7==1 and my_input8==1 and my_input9==1: #free
-            #for LED sensor
-            if self.led<150 and self.led>=100:
+            # if self.state!="Modify":
+                #for LED sensor
+            if self.led<=600:
+                print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!FindGoal!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1!!!!")
+                self.state="FindGoal"
+
+            elif self.led<=690 and self.led>600 and self.state!="Modify":
+                print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~NearGoal~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
                 if self.state!="NearGoal":
-                    self.time=30
+                    self.time=40
                     self.now_action="left"
                     self.next_action="right"
-                self.state=="NearGoal"    
+                self.state="NearGoal"    
 
-            if self.led<100:
-                self.state=="FindGoal"
 
-            if self.led>=150:
-                self.state=="NoGoal"
+
+            # if self.led>=700:
+            #     self.state="NoGoal"
 
         if my_input9==0 : #have catched the ball
             self.state="Finish"
@@ -99,16 +104,20 @@ class Control(object):
 
         #update
         if self.state=="Modify":
-            if self.time==10:
+            if self.time==14:
                 self.now_action=self.next_action
                 self.next_action=None
             if self.time<0:
                 self.state="NoGoal"
                 self.time=0
             
+            
 
         if self.state=="NearGoal":
-            if self.time==20:
+            if self.time==30:
+                self.now_action=self.next_action
+                self.next_action="left"
+            if self.time==10:
                 self.now_action=self.next_action
                 self.next_action=None
             if self.time<0:
@@ -117,7 +126,7 @@ class Control(object):
 
 
         if self.state=="FindGoal":
-                self.now_action="advance"
+            self.now_action="advance"
 
         if self.state=="NoGoal":
             self.now_action="advance"
