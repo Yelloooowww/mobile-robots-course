@@ -77,13 +77,14 @@ class Control(object):
             self.time=20
 
         if my_input7==1 and my_input8==1 and my_input9==1: #free
-            # if self.state!="Modify":
-                #for LED sensor
-            if self.led<=650:
+
+            #for LED sensor
+            if self.led<=475:
                 print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!FindGoal!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1!!!!")
                 self.state="FindGoal"
+                self.time=10
 
-            elif self.led<=650 and self.led>600 and self.state!="Modify":
+            elif self.led<=550 and self.led>475 and self.state!="Modify":
                 print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~NearGoal~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
                 if self.state!="NearGoal":
                     self.time=40
@@ -93,8 +94,7 @@ class Control(object):
 
 
 
-            # if self.led>=700:
-            #     self.state="NoGoal"
+ 
 
         if my_input9==0 : #have catched the ball
             self.state="Finish"
@@ -127,6 +127,9 @@ class Control(object):
 
         if self.state=="FindGoal":
             self.now_action="advance"
+            if self.time<0:
+                self.state="NoGoal"
+                self.time=0
 
         if self.state=="NoGoal":
             self.now_action="advance"
