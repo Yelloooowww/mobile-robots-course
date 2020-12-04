@@ -89,38 +89,38 @@ class Control(object):
         my_input8 = wiringpi.digitalRead(8)
         my_input9 = wiringpi.digitalRead(9)
 
-        if self.state!="Modify":
-            if my_input7==0 and my_input8==0 and my_input9==1: #hit
-                self.now_action="back"
-                self.next_action="stop"
-                self.next_next_action="left"
-                self.state="Modify"
-                self.time=13+4+3
-                
-            if my_input7==1 and my_input8==0 and my_input9==1: #hit
-                self.now_action="back"
-                self.next_action="stop"
-                self.next__next_action="left"
-                self.state="Modify"
-                self.time=13+4+3
+        # if self.state!="Modify":
+        if my_input7==0 and my_input8==0 and my_input9==1: #hit
+            self.now_action="back"
+            self.next_action="stop"
+            self.next_next_action="left"
+            self.state="Modify"
+            self.time=13+4+3
+            
+        elif my_input7==1 and my_input8==0 and my_input9==1: #hit
+            self.now_action="back"
+            self.next_action="stop"
+            self.next_next_action="left"
+            self.state="Modify"
+            self.time=13+4+3
 
-            if my_input7==0 and my_input8==1 and my_input9==1: #hit
-                self.now_action="back"
-                self.next_action="stop"
-                self.next_next_action="right"
-                self.state="Modify"
-                self.time=13+4+3
+        elif my_input7==0 and my_input8==1 and my_input9==1: #hit
+            self.now_action="back"
+            self.next_action="stop"
+            self.next_next_action="right"
+            self.state="Modify"
+            self.time=13+4+3
 
         if my_input7==1 and my_input8==1 and my_input9==1: #free
 
             if not self.have_eat_ball:
             #for LED sensor
-                if self.led<=475:
+                if self.led<=500:
                     # print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!FindGoal!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1!!!!")
                     self.state="FindGoal"
                     self.time=10
 
-                elif self.led<=550 and self.led>475 and self.state!="Modify" and self.excute_time>200:
+                elif self.led<=600 and self.led>500 and self.state!="Modify" and self.excute_time>200:
                     # print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~NearGoal~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
                     if self.state!="NearGoal":
                         self.time=40
@@ -149,10 +149,12 @@ class Control(object):
             if self.time==16:
                 self.now_action=self.next_action
                 self.next_action=self.next_next_action
-            if self.time==13:
+                self.next_next_action=None
+            elif self.time==13:
                 self.now_action=self.next_action
                 self.next_action=None
-            if self.time<0:
+                self.next_next_action=None
+            elif self.time<0:
                 if self.have_eat_ball:
                     self.state="Finish"
                     self.time=0
@@ -191,7 +193,7 @@ class Control(object):
                 else:
                     self.now_action="stop"
                 
-                if self.IR!=1:
+                if self.IR<0.95:
                     self.state=="Find_mouth"
                     self.now_action="advance"
                     self.time=100
@@ -204,26 +206,6 @@ class Control(object):
 
 
 
-            # if self.time==0:
-            #     print('------',self.search_goal_mouth_array,'------')
-            #     max_id=0
-            #     flag=False
-            #     for i in range(len(self.search_goal_mouth_array)):
-            #         if self.search_goal_mouth_array[i]>=self.search_goal_mouth_array[max_id] and self.search_goal_mouth_array[i]!=0:
-            #             max_id=i
-            #             flag=True
-
-                
-            #     if flag:
-            #         self.state="Find_mouth"
-            #         self.time=max_id
-            #         self.now_action="left"
-            #         self.next_action="advance"
-            #     else :
-            #         self.time=(self.search_goal_mouth_points*10+(self.search_goal_mouth_points-1)*1)+(self.search_goal_mouth_points-1)/2+10
-            #         self.state="Finish"
-            #         self.now_action="advance"
-            #         self.next_action="left"
 
         if self.state=="Find_mouth":
             self.now_action="advance"
@@ -243,7 +225,7 @@ class Control(object):
         self.motor_control()    
         # print('sample_time=',self.get_IR,'IR=',self.IR)
         # print(self.led,my_input7,my_input8,my_input9,self.state,self.now_action,self.time)
-        print(self.IR,self.state,self.now_action,self.time)
+        print(self.IR,self.led,self.state,self.now_action,self.time)
         
 
 
