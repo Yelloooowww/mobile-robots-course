@@ -144,7 +144,7 @@ class Control(object):
                 self.now_action="right"
                 self.next_action="stop"
 
-        if my_input9==1 and self.have_eat_ball=True:
+        if my_input9==1 and self.have_eat_ball==True:
             self.loss_ball_time=self.loss_ball_time+1
             print('loss_ball_time=',self.loss_ball_time)
             if self.loss_ball_time>30:
