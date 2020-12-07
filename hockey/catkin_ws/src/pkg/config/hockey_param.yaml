@@ -1,6 +1,5 @@
 ---
 led_low: 500
-led_low: 500
 led_high: 600
 IR_goal: 0.8
 
