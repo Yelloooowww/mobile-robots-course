@@ -1,0 +1,13 @@
+---
+led_low: 500
+led_low: 500
+led_high: 600
+IR_goal: 0.8
+
+start_search_time: 200
+
+modify_back_time: 4
+modify_stop_time: 3
+modify_turn_time: 13
+
+find_mouth_advance_time: 100

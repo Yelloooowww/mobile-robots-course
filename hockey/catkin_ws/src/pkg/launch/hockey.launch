@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<launch>
+    <!-- <param name="/led_low" type="int" value="500" />
+    <param name="/led_high" type="int" value="600" />
+    <param name="/IR_goal" type="double" value="0.8" />
+
+    <param name="/start_search_time" type="int" value="200" />
+
+    <param name="/modify_back_time" type="int" value="4" />
+    <param name="/modify_stop_time" type="int" value="3" />
+    <param name="/modify_turn_time" type="int" value="13" />
+
+    <param name="/find_mouth_advance_time" type="int" value="100" /> -->
+
+
+
+    <node pkg="pkg" type="hockey_timer.py" name="hockey_timer" output="screen">
+        <rosparam command="load" file="$(find pkg)/config/hockey_param.yaml" />
+    </node>
+</launch>
