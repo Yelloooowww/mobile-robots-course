@@ -1,12 +1,15 @@
 ---
-led_low: 500
-led_high: 600
-IR_goal: 0.8
+led_low: 475
+led_high: 650
+led_eat: 400
+IR_goal: 0.7
+IR_err: 0.1
 
-start_search_time: 200
+start_search_time: 500
 
-modify_back_time: 4
-modify_stop_time: 3
-modify_turn_time: 13
+modify_back_time: 1
+modify_stop_time: 2
+modify_turn_time: 5
+modify_turn_time_back: 13
 
-find_mouth_advance_time: 100
+find_mouth_advance_time: 1000

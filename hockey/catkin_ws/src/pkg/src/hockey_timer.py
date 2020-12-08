@@ -19,6 +19,7 @@ class Control(object):
         self.excute_time=0
 
         self.led=-1000
+        self.last_action=None
         self.now_action=None
         self.next_action=None
         self.next_next_action=None
@@ -28,7 +29,7 @@ class Control(object):
         self.sub_led = rospy.Subscriber("pub_led", Int32, self.cb_led, queue_size=1)
         self.sub_IR = rospy.Subscriber("pub_IR", Int32, self.cb_IR, queue_size=1)
         self.pub_int = rospy.Publisher("array", Int32, queue_size=1)
-        self.timer = rospy.Timer(rospy.Duration(0.1), self.control_loop)
+        self.timer = rospy.Timer(rospy.Duration(0.05), self.control_loop)
 
         self.get_IR=0
         self.IR_1=0
@@ -40,14 +41,18 @@ class Control(object):
         self.loss_ball_time=0
 
         #get some param.
-        self.led_low=rospy.get_param("/led_low")
-        self.led_high=rospy.get_param("/led_high")
-        self.IR_goal=rospy.get_param("/IR_goal")
-        self.start_search_time=rospy.get_param("/start_search_time")
-        self.modify_back_time=rospy.get_param("/modify_back_time")
-        self.modify_stop_time=rospy.get_param("/modify_stop_time")
-        self.modify_turn_time=rospy.get_param("/modify_turn_time")
-        self.find_mouth_advance_time=rospy.get_param("/find_mouth_advance_time")
+        self.led_low=rospy.get_param("/hockey_timer/led_low")
+        self.led_high=rospy.get_param("/hockey_timer/led_high")
+        self.led_eat=rospy.get_param("/hockey_timer/led_eat")
+        self.IR_goal=rospy.get_param("/hockey_timer/IR_goal")
+        self.IR_err=rospy.get_param("/hockey_timer/IR_err")
+
+        self.start_search_time=rospy.get_param("/hockey_timer/start_search_time")
+        self.modify_back_time=rospy.get_param("/hockey_timer/modify_back_time")
+        self.modify_stop_time=rospy.get_param("/hockey_timer/modify_stop_time")
+        self.modify_turn_time=rospy.get_param("/hockey_timer/modify_turn_time")
+        self.modify_turn_time_back=rospy.get_param("/hockey_timer/modify_turn_time_back")
+        self.find_mouth_advance_time=rospy.get_param("/hockey_timer/find_mouth_advance_time")
 
 
         print("init done")
@@ -101,6 +106,7 @@ class Control(object):
             self.next_action="stop"
             self.next_next_action="left"
             self.state="Modify"
+            self.modify_turn_time=self.modify_turn_time_back
             self.time=self.modify_back_time+self.modify_stop_time+self.modify_turn_time
 
         elif my_input7==1 and my_input8==0 and my_input9==1: #hit
@@ -123,11 +129,11 @@ class Control(object):
             #for LED sensor
                 if self.led<=self.led_low:
                     self.state="FindGoal"
-                    self.time=10
+                    self.time=10*2
 
                 elif self.led<=self.led_high and self.led>self.led_low and self.state!="Modify" and self.excute_time>self.start_search_time:
                     if self.state!="NearGoal":
-                        self.time=40
+                        self.time=40*2
                         self.now_action="left"
                         self.next_action="right"
                     self.state="NearGoal"
@@ -136,10 +142,10 @@ class Control(object):
 
 
 
-        if my_input9==0 : #have catched the ball
+        if my_input9==0 or self.led<=self.led_eat: #have catched the ball
             self.have_eat_ball=True
             if self.state!="Finish":
-                self.time=30*10
+                self.time=30*10*2
                 self.state="Finish"
                 self.now_action="right"
                 self.next_action="stop"
@@ -147,7 +153,7 @@ class Control(object):
         if my_input9==1 and self.have_eat_ball==True:
             self.loss_ball_time=self.loss_ball_time+1
             print('loss_ball_time=',self.loss_ball_time)
-            if self.loss_ball_time>30:
+            if self.loss_ball_time>30*2:
                 print('------------loss the ball------------')
                 self.have_eat_ball=False
                 self.loss_ball_time=0
@@ -179,10 +185,10 @@ class Control(object):
 
 
         if self.state=="NearGoal":
-            if self.time==30:
+            if self.time==30*2:
                 self.now_action=self.next_action
                 self.next_action="left"
-            if self.time==10:
+            if self.time==10*2:
                 self.now_action=self.next_action
                 self.next_action=None
             if self.time<0:
@@ -202,18 +208,19 @@ class Control(object):
 
         if self.state=="Finish":
             if self.time>0:
-                if (self.time%2)>0:
+                if (self.time%4)>1:
                     self.now_action="right"
                 else:
                     self.now_action="stop"
 
-                if self.IR<self.IR_goal+0.075 and self.IR>self.IR_goal-0.075:
+                # if not self.IR==0:
+                if self.IR<self.IR_goal+self.IR_err and self.IR>self.IR_goal-self.IR_err:
                     self.state=="Find_mouth"
                     self.now_action="advance"
                     self.time=self.find_mouth_advance_time
 
             if self.time==0:
-                self.time=30*10
+                self.time=30*10*2
                 self.state="Finish"
                 self.now_action="right"
 
@@ -224,7 +231,7 @@ class Control(object):
         if self.state=="Find_mouth":
             self.now_action="advance"
             if self.time<0:
-                self.time=30*10
+                self.time=30*10*2
                 self.state="Finish"
                 self.now_action="right"
 
@@ -232,9 +239,19 @@ class Control(object):
 
 
 
+        
+        
+
+        if not self.now_action=="advance":
+            self.motor_control()
+        else:
+            if not self.last_action==self.now_action:
+                self.motor_control()
+
+
         self.excute_time=self.excute_time+1
         self.time=self.time-1
-        self.motor_control()
+        self.last_action=self.now_action
 
         print(self.IR,self.led,self.state,self.now_action,self.time)
 

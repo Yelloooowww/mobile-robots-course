@@ -4,6 +4,7 @@
     <!-- <param name="/led_low" type="int" value="500" />
     <param name="/led_high" type="int" value="600" />
     <param name="/IR_goal" type="double" value="0.8" />
+    <param name="/IR_err" type="double" value="0.075" />
 
     <param name="/start_search_time" type="int" value="200" />
 
