@@ -242,12 +242,12 @@ class Control(object):
         
         
 
-        if not self.now_action=="advance":
-            self.motor_control()
-        else:
-            if not self.last_action==self.now_action:
-                self.motor_control()
-
+        # if not self.now_action=="advance":
+        #     self.motor_control()
+        # else:
+        #     if not self.last_action==self.now_action:
+        #         self.motor_control()
+        self.motor_control()
 
         self.excute_time=self.excute_time+1
         self.time=self.time-1
