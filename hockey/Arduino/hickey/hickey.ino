@@ -27,6 +27,7 @@ double Setpointright=0;
 double Setpointleft=0;
 double Kp=0.6, Ki=5, Kd=0;
 
+//int MODE= -1;
 int MODE;
 int count=0;
 
@@ -113,11 +114,13 @@ void loop()
       IR.data = analogRead(A1);
       pub_IR.publish( &IR );
 
+
       if(MODE==1){advance();}//Motor Forward
       if(MODE==2){right();}
       if(MODE==3){left();}
       if(MODE==4){back();}
       if(MODE==5){Stop();}
+      
       abs_durationright=abs(durationright);
       resultright=rightPID.Compute();//PID conversion is complete and returns 1
       if(resultright)
@@ -132,6 +135,7 @@ void loop()
         durationleft = 0; //Count clear, wait for the next count
       }
 
+      
       nh.spinOnce();
 }
 
