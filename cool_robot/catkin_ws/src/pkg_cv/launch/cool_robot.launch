@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<launch>
+    <node pkg="pkg_cv" type="camera.py" name="camera" output="screen"></node>
+    <node pkg="pkg_cv" type="control_PID.py" name="control_PID" output="screen"></node>
+</launch>
