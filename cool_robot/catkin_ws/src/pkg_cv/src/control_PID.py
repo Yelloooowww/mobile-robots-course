@@ -26,6 +26,7 @@ class Control(object):
 
 
     def cb_info(self,msg):
+        # print('goal_point=',msg.data[2],msg.data[3])
         self.goal_index = float( float(msg.data[2])/float(msg.data[0]) )-0.5
 
 
@@ -33,7 +34,7 @@ class Control(object):
 
         if self.goal_index == None:
             self.no_goal = self.no_goal+1
-            if self.no_goal>=10:
+            if self.no_goal>=5:
                 rospy.loginfo(self.goal_index)
                 motor_array = Int32MultiArray()
                 motor_array.data = [ 1, 1, 0, 0 ]
@@ -49,7 +50,8 @@ class Control(object):
             motor_array.data = [ 1, 1, int(self.advance_speed+u), int(self.advance_speed-u) ]
             self.pub_motor.publish(motor_array)
 
-            rospy.loginfo(motor_array.data)
+            rospy.loginfo('See goal')
+            print('goal_index=',self.goal_index,'u=',u,'motor=',motor_array.data)
 
 
 

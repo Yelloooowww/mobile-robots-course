@@ -51,7 +51,7 @@ if __name__ == '__main__':
                 detection_x = detection_x + (x+0.5*w)
                 detection_y = detection_y + (y+0.5*h)
 
-                if detection_time>= 5:
+                if detection_time>= 1:
                     rospy.loginfo('-----------------detection-----------------')
                     avg_x, avg_y = detection_x/detection_time, detection_y/detection_time
                     imageFrame = cv2.circle(imageFrame, ( int(avg_x), int(avg_y) ), radius=5, color=(0, 0, 255), thickness=10 )
