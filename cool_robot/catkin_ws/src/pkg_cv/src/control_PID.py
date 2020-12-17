@@ -14,7 +14,7 @@ from PID import PID_control
 
 class Control(object):
     def __init__(self):
-        self.controller=PID_control("cool robot control", P=100, I=0.0, D=50)
+        self.controller=PID_control("cool robot control", P=130, I=0.0, D=15)
         self.pub_motor = rospy.Publisher('motor_control', Int32MultiArray ,queue_size=10)
         self.sub_info = rospy.Subscriber("detection_info", Int32MultiArray, self.cb_info, queue_size=10)
         self.goal_index = None
@@ -47,7 +47,7 @@ class Control(object):
             self.controller.update(self.goal_index)
             u=self.controller.output
             motor_array = Int32MultiArray()
-            motor_array.data = [ 1, 1, int(self.advance_speed+u), int(self.advance_speed-u) ]
+            motor_array.data = [ 1, 1, int(self.advance_speed-u), int(self.advance_speed+u) ]
             self.pub_motor.publish(motor_array)
 
             rospy.loginfo('See goal')
