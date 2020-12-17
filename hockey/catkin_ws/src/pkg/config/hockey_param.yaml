@@ -2,7 +2,7 @@
 led_low: 475
 led_high: 650
 led_eat: 400
-IR_goal: 0.7
+IR_goal: 0.8
 IR_err: 0.1
 
 start_search_time: 500
