@@ -38,11 +38,11 @@ if __name__ == '__main__':
         _, contours, hierarchy = cv2.findContours(green_mask,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
 
 
-        max_area, max_x, max_y, max_w, max_h = 300, None, None, None, None
+        max_area, max_x, max_y, max_w, max_h = 100, None, None, None, None
         for pic, contour in enumerate(contours):
             area = cv2.contourArea(contour)
             if area >= max_area: max_x,max_y,max_w,max_h = cv2.boundingRect(contour)
-            if(area > 300):
+            if(area > 100):
                 x, y, w, h = cv2.boundingRect(contour)
                 imageFrame = cv2.rectangle(imageFrame, (x, y),(x + w, y + h), (0, 255, 0), 2)
                 cv2.putText(imageFrame, "Green Colour", (x, y),cv2.FONT_HERSHEY_SIMPLEX,1.0, (0, 255, 0))

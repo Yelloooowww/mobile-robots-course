@@ -29,13 +29,21 @@ def distance(TRIGGER_PIN,ECHO_PIN):
     StartTime = time.time()
     StopTime = time.time()
  
+    tmpA=0
+    tmpB=0
     # save StartTime
     while wiringpi.digitalRead(GPIO_ECHO) == 0:
         StartTime = time.time()
+        tmpA = tmpA+1
+        if tmpA > 1000000:
+            break
  
     # save time of arrival
     while wiringpi.digitalRead(GPIO_ECHO) == 1:
         StopTime = time.time()
+        tmpB = tmpB+1
+        if tmpB > 1000000:
+            break
  
     # time difference between start and arrival
     TimeElapsed = StopTime - StartTime
@@ -65,8 +73,8 @@ if __name__ == '__main__':
         # dist_0,dist_1,dist_2 = distance()
         dist_0=distance(GPIO_TRIGGER_0 ,GPIO_ECHO_0)
         dist_1=distance(GPIO_TRIGGER_1 ,GPIO_ECHO_1)
-        # dist_2=distance(GPIO_TRIGGER_2 ,GPIO_ECHO_2)
-        dist_2=0
+        dist_2=distance(GPIO_TRIGGER_2 ,GPIO_ECHO_2)
+        
 
         dis_msg = Float32MultiArray()
         dis_msg.data = [dist_0,dist_1,dist_2]
