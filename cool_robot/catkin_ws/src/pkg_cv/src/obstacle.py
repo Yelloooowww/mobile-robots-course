@@ -20,13 +20,15 @@ class Control(object):
         self.ultrasonic_middle = None
         self.ultrasonic_left = None
         self.ultrasonic_right = None
-        # self.timer = rospy.Timer(rospy.Duration(0.1), self.control_loop)
+        self.timer = rospy.Timer(rospy.Duration(0.2), self.timer_control_loop)
 
         self.advance_speed = 100
+        self.update_ultrasonic = False
         print("Obstacle init done")
 
         
     def cb_ultrasonic(self,msg):
+        self.update_ultrasonic = True
         self.ultrasonic_middle = float(msg.data[0])
         self.ultrasonic_left = float(msg.data[1])
         self.ultrasonic_right = float(msg.data[2])
@@ -77,12 +79,22 @@ class Control(object):
 
         # back
         elif (self.ultrasonic_left < 40 ) and (self.ultrasonic_right < 40 ) and (self.ultrasonic_middle < 40 ):
-            motor_array.data = [ 1, 1, int(-self.advance_speed), int(-self.advance_speed) ]
+            if self.ultrasonic_left < self.ultrasonic_right:
+                self.controller_Obstacle.update(float(self.ultrasonic_right-40))
+            else:
+                self.controller_Obstacle.update(float(self.ultrasonic_left-40))
+            u=self.controller_Obstacle.output
+            motor_array.data = [ 1, 1, int(-(self.advance_speed+u)), int(-(self.advance_speed-u)) ]
             rospy.loginfo('~~~~~~See Obstacle(all)~~~~~~')
 
         # advance
         elif (self.ultrasonic_left < 40 ) and (self.ultrasonic_right < 40 ) and (self.ultrasonic_middle > 40 ):
-            motor_array.data = [ 1, 1, int(self.advance_speed), int(self.advance_speed) ]
+            if self.ultrasonic_left < self.ultrasonic_right:
+                self.controller_Obstacle.update(float(self.ultrasonic_right-40))
+            else:
+                self.controller_Obstacle.update(float(self.ultrasonic_left-40))
+            u=self.controller_Obstacle.output
+            motor_array.data = [ 1, 1, int(self.advance_speed-u), int(self.advance_speed+u) ]
             rospy.loginfo('~~~~~~See Obstacle(right&left)~~~~~~')
 
         # back
@@ -99,14 +111,17 @@ class Control(object):
 
         
 
-        if motor_array.data[2]>255: motor_array.data[2] = 255
-        if motor_array.data[3]>255: motor_array.data[3] = 255
+        
         if motor_array.data[2]<0: 
             motor_array.data[2] = abs(motor_array.data[2])
             motor_array.data[0] = 0
         if motor_array.data[3]<0: 
             motor_array.data[3] = abs(motor_array.data[3])
             motor_array.data[1] = 0
+        if motor_array.data[2]>=200: 
+            motor_array.data[2] = 200
+        if motor_array.data[3]>200: 
+            motor_array.data[3] = 200
 
 
         print(motor_array.data)
@@ -117,6 +132,15 @@ class Control(object):
 
 
 
+
+
+    def timer_control_loop(self,event):
+        if self.update_ultrasonic == False:
+            rospy.loginfo('!!! Timeout stop !!!')
+            motor_array = Int32MultiArray()
+            motor_array.data = [ 1, 1, 0, 0 ]
+            self.pub_motor.publish(motor_array)
+        self.update_ultrasonic = False
 
 
 

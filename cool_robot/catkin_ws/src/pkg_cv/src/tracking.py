@@ -23,6 +23,7 @@ class Control(object):
         self.advance_speed = 100
         self.no_goal = 0
 
+        self.timer = rospy.Timer(rospy.Duration(0.2), self.timer_control_loop)
         print("Tracking init done")
 
 
@@ -36,19 +37,6 @@ class Control(object):
 
 
     def control_loop(self):
-        
-
-        if self.goal_index == None:
-            self.no_goal = self.no_goal+1
-            if self.no_goal>=5:
-                rospy.loginfo(self.goal_index)
-                motor_array = Int32MultiArray()
-                motor_array.data = [ 1, 1, 0, 0 ]
-                self.pub_motor.publish(motor_array)
-
-                self.no_goal = 0
-
-
         if self.goal_index != None:
             self.controller_tracking.update(self.goal_index)
             u=self.controller_tracking.output
@@ -67,6 +55,16 @@ class Control(object):
 
 
 
+    def timer_control_loop(self,event):
+        if self.goal_index == None:
+            self.no_goal = self.no_goal+1
+            if self.no_goal>=5:
+                rospy.loginfo(self.goal_index)
+                motor_array = Int32MultiArray()
+                motor_array.data = [ 1, 1, 0, 0 ]
+                self.pub_motor.publish(motor_array)
+
+                self.no_goal = 0
 
 
 
