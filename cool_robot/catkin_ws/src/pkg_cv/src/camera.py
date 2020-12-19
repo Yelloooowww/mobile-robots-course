@@ -19,49 +19,55 @@ if __name__ == '__main__':
     bridge = CvBridge()
     cap = cv2.VideoCapture(0)
 
-    detection_time = 0
-    detection_x, detection_y = 0, 0
 
     while not rospy.is_shutdown():
         # Capture frame-by-frame
         ret, imageFrame = cap.read()
         hsvFrame = cv2.cvtColor(imageFrame, cv2.COLOR_BGR2HSV)
-        # define mask
-        green_lower = np.array([40, 52, 72], np.uint8)
-        green_upper = np.array([70,255,255], np.uint8)
-        green_mask = cv2.inRange(hsvFrame, green_lower, green_upper)
+
+        # lower mask (0-10)
+        lower_red = np.array([0,50,50], np.uint8)
+        upper_red = np.array([10,255,255], np.uint8)
+        mask0 = cv2.inRange(hsvFrame, lower_red, upper_red)
+
+        # upper mask (170-180)
+        lower_red = np.array([170,50,50], np.uint8)
+        upper_red = np.array([180,255,255], np.uint8)
+        mask1 = cv2.inRange(hsvFrame, lower_red, upper_red)
+
+        # join my masks
+        red_mask = mask0+mask1
+
         kernal = np.ones((5, 5), "uint8")
 
         # For green color
-        green_mask = cv2.dilate(green_mask, kernal)
-        res_green = cv2.bitwise_and(imageFrame, imageFrame,mask = green_mask)
-        _, contours, hierarchy = cv2.findContours(green_mask,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
+        red_mask = cv2.dilate(red_mask, kernal)
+        res_green = cv2.bitwise_and(imageFrame, imageFrame,mask = red_mask)
+        _, contours, hierarchy = cv2.findContours(red_mask,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
 
 
-        max_area, max_x, max_y, max_w, max_h = 100, None, None, None, None
+        max_area, max_x, max_y, max_w, max_h = 0, None, None, None, None
+        detection_time = 0
         for pic, contour in enumerate(contours):
             area = cv2.contourArea(contour)
-            if area >= max_area: max_x,max_y,max_w,max_h = cv2.boundingRect(contour)
-            if(area > 100):
+            if(area > 300):
                 x, y, w, h = cv2.boundingRect(contour)
+                if area > max_area: 
+                    max_area,max_x,max_y,max_w,max_h = area, x, y, w, h 
                 imageFrame = cv2.rectangle(imageFrame, (x, y),(x + w, y + h), (0, 255, 0), 2)
-                cv2.putText(imageFrame, "Green Colour", (x, y),cv2.FONT_HERSHEY_SIMPLEX,1.0, (0, 255, 0))
 
                 detection_time = detection_time+1
-                detection_x = detection_x + (x+0.5*w)
-                detection_y = detection_y + (y+0.5*h)
 
-                if detection_time>= 1:
-                    rospy.loginfo('-----------------detection-----------------')
-                    avg_x, avg_y = detection_x/detection_time, detection_y/detection_time
-                    imageFrame = cv2.circle(imageFrame, ( int(avg_x), int(avg_y) ), radius=5, color=(0, 0, 255), thickness=10 )
+        if detection_time>= 1:
+            rospy.loginfo('-----------------detection-----------------')
+            imageFrame = cv2.rectangle(imageFrame, (max_x, max_y),(max_x + max_w, max_y + max_h), (0, 0, 255), 2)
+            imageFrame = cv2.circle(imageFrame, ( int(max_x+0.5*max_w), int(max_y+0.5*max_h) ), radius=5, color=(0, 0, 255), thickness=10 )
 
-                    detection_info = Int32MultiArray()
-                    detection_info.data = [imageFrame.shape[1],imageFrame.shape[0],avg_x,avg_y]
-                    pub_info.publish(detection_info)
+            detection_info = Int32MultiArray()
+            detection_info.data = [imageFrame.shape[1],imageFrame.shape[0],max_x+0.5*max_w ,max_y+0.5*max_h]
+            pub_info.publish(detection_info)
 
-                    detection_time = 0
-                    detection_x, detection_y = 0, 0
+           
 
 
 

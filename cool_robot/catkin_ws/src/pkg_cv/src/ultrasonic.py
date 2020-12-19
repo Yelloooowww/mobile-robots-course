@@ -29,13 +29,16 @@ def distance(TRIGGER_PIN,ECHO_PIN):
     StartTime = time.time()
     StopTime = time.time()
  
-    tmpA=0
-    tmpB=0
+    tmpA = 0
+    tmpB = 0
+
+    timeout_flag = False
     # save StartTime
     while wiringpi.digitalRead(GPIO_ECHO) == 0:
         StartTime = time.time()
         tmpA = tmpA+1
         if tmpA > 1000000:
+            timeout_flag
             break
  
     # save time of arrival
@@ -43,6 +46,7 @@ def distance(TRIGGER_PIN,ECHO_PIN):
         StopTime = time.time()
         tmpB = tmpB+1
         if tmpB > 1000000:
+            timeout_flag
             break
  
     # time difference between start and arrival
@@ -51,7 +55,7 @@ def distance(TRIGGER_PIN,ECHO_PIN):
     # and divide by 2, because there and back
     distance = (TimeElapsed * 34300) / 2
  
-    return distance
+    return distance,timeout_flag
  
 if __name__ == '__main__':
     rospy.init_node('ultrasonic_sensor', anonymous=True)
@@ -71,15 +75,15 @@ if __name__ == '__main__':
 
     while not rospy.is_shutdown():
         # dist_0,dist_1,dist_2 = distance()
-        dist_0=distance(GPIO_TRIGGER_0 ,GPIO_ECHO_0)
-        dist_1=distance(GPIO_TRIGGER_1 ,GPIO_ECHO_1)
-        dist_2=distance(GPIO_TRIGGER_2 ,GPIO_ECHO_2)
+        dist_0,timeout_flag_0=distance(GPIO_TRIGGER_0 ,GPIO_ECHO_0)
+        dist_1,timeout_flag_1=distance(GPIO_TRIGGER_1 ,GPIO_ECHO_1)
+        dist_2,timeout_flag_2=distance(GPIO_TRIGGER_2 ,GPIO_ECHO_2)
         
-
-        dis_msg = Float32MultiArray()
-        dis_msg.data = [dist_0,dist_1,dist_2]
-        pub_ultrasonic.publish(dis_msg)
-        # print ("Measured Distance = %.2f,%.2f,%.2f" %dist_0 dist_1 dist_2)
-        print("Measured Distance ={:^5f} {:^5f} {:^5f}".format(dist_0,dist_1,dist_2))
+        if (timeout_flag_0 == False) and (timeout_flag_1 == False) and (timeout_flag_2 == False):
+            dis_msg = Float32MultiArray()
+            dis_msg.data = [dist_0,dist_1,dist_2]
+            pub_ultrasonic.publish(dis_msg)
+            # print ("Measured Distance = %.2f,%.2f,%.2f" %dist_0 dist_1 dist_2)
+            print("Measured Distance ={:^5f} {:^5f} {:^5f}".format(dist_0,dist_1,dist_2))
 
         rate.sleep()
