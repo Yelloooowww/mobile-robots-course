@@ -64,7 +64,7 @@ if __name__ == '__main__':
             imageFrame = cv2.circle(imageFrame, ( int(max_x+0.5*max_w), int(max_y+0.5*max_h) ), radius=5, color=(0, 0, 255), thickness=10 )
 
             detection_info = Int32MultiArray()
-            detection_info.data = [imageFrame.shape[1],imageFrame.shape[0],max_x+0.5*max_w ,max_y+0.5*max_h]
+            detection_info.data = [imageFrame.shape[1],imageFrame.shape[0],max_x+0.5*max_w ,max_y+0.5*max_h,max_area]
             pub_info.publish(detection_info)
 
            
