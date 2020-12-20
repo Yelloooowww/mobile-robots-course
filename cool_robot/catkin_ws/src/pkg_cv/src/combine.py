@@ -17,11 +17,11 @@ from pkg_cv.msg import IntArrayWithHeader,FloatArrayWithHeader
 class Control(object):
     def __init__(self):
         self.controller_Obstacle = PID_control("obstacle control", P=2.2, I=0.0, D=0.05)
-        self.controller_tracking = PID_control("tracking control", P=100, I=0.0, D=20)
+        self.controller_tracking = PID_control("tracking control", P=25, I=0.0, D=0)
         sub_ultrasonic = message_filters.Subscriber('/ultrasonic_header',FloatArrayWithHeader)
         sub_info = message_filters.Subscriber('/detection_info_header',IntArrayWithHeader)
-        ts = message_filters.ApproximateTimeSynchronizer([sub_ultrasonic, sub_info], 10, slop=0.1)
-		ts.registerCallback(self.callback)
+        ts = message_filters.ApproximateTimeSynchronizer([sub_ultrasonic, sub_info],1, 0.1, allow_headerless=True)
+        ts.registerCallback(self.callback)
         self.pub_motor = rospy.Publisher('motor_control', Int32MultiArray ,queue_size=10)
 
         self.ultrasonic_middle = None
@@ -30,10 +30,10 @@ class Control(object):
         self.update_ultrasonic = False
         self.goal_index = None
         self.goal_area = 0
-        self.advance_speed = 90
+        self.advance_speed = 100
         self.force_tracking = False
         self.update = False
-        self.timer = rospy.Timer(rospy.Duration(0.5), self.timeout_control)
+        self.timer = rospy.Timer(rospy.Duration(0.2), self.timeout_control)
         print("init done")
 
 
@@ -45,7 +45,7 @@ class Control(object):
         if len(msg_info.data) == 5:
             rospy.loginfo('See Goal')
             self.goal_index = float( float(msg_info.data[2])/float(msg_info.data[0]) )-0.5
-            self.goal_area = msg.data[4]
+            self.goal_area = msg_info.data[4]
         else :
             rospy.loginfo('No Goal')
             self.goal_index = None
@@ -62,32 +62,31 @@ class Control(object):
         if (self.ultrasonic_left < 40 ) and (self.ultrasonic_right > 40 )  and (self.ultrasonic_middle < 40 ):
             self.controller_Obstacle.update(float(self.ultrasonic_left-40))
             u=self.controller_Obstacle.output
-
+            
             motor_array.data = [ 1, 1, int(self.advance_speed+u), int(self.advance_speed-u) ]
             rospy.loginfo('~~~~~~See Obstacle(left&forward)~~~~~~')
-
-
+        
         # turn right
         elif (self.ultrasonic_left < 40 ) and (self.ultrasonic_right > 40 )  and (self.ultrasonic_middle > 40 ):
             self.controller_Obstacle.update(float(self.ultrasonic_left-40))
             u=self.controller_Obstacle.output
-
+            
             motor_array.data = [ 1, 1, int(self.advance_speed+u), int(self.advance_speed-u) ]
             rospy.loginfo('~~~~~~See Obstacle(left)~~~~~~')
-
+        
         #turn left
         elif (self.ultrasonic_left > 40 ) and (self.ultrasonic_right < 40 ) and (self.ultrasonic_middle < 40 ) :
             self.controller_Obstacle.update(float(self.ultrasonic_right-40))
             u=self.controller_Obstacle.output
-
-            motor_array.data = [ 1, 1, int(self.advance_speed-5*u), int(self.advance_speed+5*u) ]
+            
+            motor_array.data = [ 1, 1, int(self.advance_speed-u), int(self.advance_speed+u) ]
             rospy.loginfo('~~~~~~See Obstacle(right&forward)~~~~~~')
-
+        
         #turn left
         elif (self.ultrasonic_left > 40 ) and (self.ultrasonic_right < 40 ) and (self.ultrasonic_middle > 40 ) :
             self.controller_Obstacle.update(float(self.ultrasonic_right-40))
             u=self.controller_Obstacle.output
-
+            
             motor_array.data = [ 1, 1, int(self.advance_speed-u), int(self.advance_speed+u) ]
             rospy.loginfo('~~~~~~See Obstacle(right)~~~~~~')
 
@@ -98,7 +97,7 @@ class Control(object):
             else:
                 self.controller_Obstacle.update(float(self.ultrasonic_left-40))
             u=self.controller_Obstacle.output
-            motor_array.data = [ 1, 1, int(-(self.advance_speed+10*u)), int(-(self.advance_speed-10*u)) ]
+            motor_array.data = [ 1, 1, int(-(self.advance_speed+u)), int(-(self.advance_speed-u)) ]
             rospy.loginfo('~~~~~~See Obstacle(all)~~~~~~')
 
         # advance
@@ -118,6 +117,7 @@ class Control(object):
 
         # tracking
         elif (self.ultrasonic_left > 40 ) and (self.ultrasonic_right > 40 ) and (self.ultrasonic_middle > 40 ):
+            # motor_array.data = [ 1, 1, int(self.advance_speed), int(self.advance_speed) ]
             rospy.loginfo('~~~~~~No Obstacle~~~~~~')
             if self.goal_index != None:
                 self.force_tracking = True
@@ -125,20 +125,23 @@ class Control(object):
                 motor_array.data = [ 1, 1, int(self.advance_speed), int(self.advance_speed) ]
 
 
-        if self.goal_area > 20000:
+        if self.goal_area > 15000:
+        # if self.goal_area > 1000:
                 self.force_tracking = True
                 print('force_tracking')
 
         if  self.force_tracking == True :
                 if self.goal_index != None:
-                    if self.goal_area > 100000:
+                    if self.goal_area > 80000:
                         motor_array.data = [ 1, 1, 0, 0 ]
                         rospy.loginfo('Goal Reach')
                     else :
+                        self.advance_speed = 80
                         self.controller_tracking.update(self.goal_index)
                         u=self.controller_tracking.output
                         motor_array.data = [ 1, 1, int(self.advance_speed-u), int(self.advance_speed+u) ]
                         rospy.loginfo('tracking')
+                        self.advance_speed = 100
 
         if motor_array.data[2]<0:
             motor_array.data[2] = abs(motor_array.data[2])

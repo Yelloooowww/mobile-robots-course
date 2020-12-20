@@ -12,18 +12,4 @@
     <param name="bridge_to" value="/bridge/img_detection"/>
   </node>
 
-  <node pkg="bridge" type="bridge.py" name="bridge_detection_info" args="$(arg wlan0)" output="screen">
-    <param name="bridge_type" value="Int32MultiArray"/>
-    <param name="bridge_from" value="/detection_info"/>
-    <param name="bridge_to" value="/bridge/detection_info"/>
-  </node>
-
-  <node pkg="bridge" type="bridge.py" name="bridge_ultrasonic" args="$(arg wlan0)" output="screen">
-    <param name="bridge_type" value="Float32MultiArray"/>
-    <param name="bridge_from" value="/ultrasonic"/>
-    <param name="bridge_to" value="/bridge/ultrasonic"/>
-  </node>
-
-
-
 </launch>

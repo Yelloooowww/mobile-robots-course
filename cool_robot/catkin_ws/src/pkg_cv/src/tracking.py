@@ -14,13 +14,13 @@ from PID import PID_control
 
 class Control(object):
     def __init__(self):
-        self.controller_tracking = PID_control("cool robot control", P=100, I=0.0, D=20)
+        self.controller_tracking = PID_control("cool robot control",  P=25, I=0.0, D=0)
         self.pub_motor = rospy.Publisher('motor_control', Int32MultiArray ,queue_size=10)
         self.sub_info = rospy.Subscriber("detection_info", Int32MultiArray, self.cb_detection_info, queue_size=10)
         self.goal_index = None
         self.goal_area = None
 
-        self.advance_speed = 100
+        self.advance_speed = 80
         self.no_goal = 0
 
         self.timer = rospy.Timer(rospy.Duration(0.2), self.timer_control_loop)
@@ -29,6 +29,7 @@ class Control(object):
 
     def cb_detection_info(self,msg):
         self.goal_index = float( float(msg.data[2])/float(msg.data[0]) )-0.5
+        self.goal_area = msg.data[4]
 
         self.control_loop()
         
@@ -38,14 +39,19 @@ class Control(object):
 
     def control_loop(self):
         if self.goal_index != None:
-            self.controller_tracking.update(self.goal_index)
-            u=self.controller_tracking.output
-            motor_array = Int32MultiArray()
-            motor_array.data = [ 1, 1, int(self.advance_speed-u), int(self.advance_speed+u) ]
-            self.pub_motor.publish(motor_array)
-
-            rospy.loginfo('See goal')
-            print('goal_index=',self.goal_index,'u=',u,'motor=',motor_array.data)
+            if self.goal_area > 80000:
+                motor_array = Int32MultiArray()
+                motor_array.data = [ 1, 1, 0, 0 ]
+                self.pub_motor.publish(motor_array)
+                rospy.loginfo('Goal Reach')
+            else:
+                self.controller_tracking.update(self.goal_index)
+                u=self.controller_tracking.output
+                motor_array = Int32MultiArray()
+                motor_array.data = [ 1, 1, int(self.advance_speed-u), int(self.advance_speed+u) ]
+                self.pub_motor.publish(motor_array)
+                rospy.loginfo('See goal')
+                print('goal_index=',self.goal_index,'u=',u,'motor=',motor_array.data)
 
 
 
