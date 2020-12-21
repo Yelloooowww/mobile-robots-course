@@ -27,18 +27,21 @@ if __name__ == '__main__':
         ret, imageFrame = cap.read()
         hsvFrame = cv2.cvtColor(imageFrame, cv2.COLOR_BGR2HSV)
 
-        # lower mask (0-10)
-        lower_red = np.array([0,50,50], np.uint8)
-        upper_red = np.array([10,255,255], np.uint8)
-        mask0 = cv2.inRange(hsvFrame, lower_red, upper_red)
+        # # lower mask (0-10)
+        # lower_red = np.array([0,50,50], np.uint8)
+        # upper_red = np.array([10,255,255], np.uint8)
+        # mask0 = cv2.inRange(hsvFrame, lower_red, upper_red)
 
-        # upper mask (170-180)
-        lower_red = np.array([170,50,50], np.uint8)
-        upper_red = np.array([180,255,255], np.uint8)
-        mask1 = cv2.inRange(hsvFrame, lower_red, upper_red)
+        # # upper mask (170-180)
+        # lower_red = np.array([170,50,50], np.uint8)
+        # upper_red = np.array([180,255,255], np.uint8)
+        # mask1 = cv2.inRange(hsvFrame, lower_red, upper_red)
 
-        # join my masks
-        red_mask = mask0+mask1
+        # # join my masks
+        # red_mask = mask0+mask1
+        lower_red = np.array([161, 155, 84])
+        upper_red = np.array([179, 255, 255])
+        red_mask = cv2.inRange(hsvFrame, lower_red, upper_red)
 
         kernal = np.ones((5, 5), "uint8")
 
