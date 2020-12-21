@@ -38,7 +38,7 @@ def distance(TRIGGER_PIN,ECHO_PIN):
     while wiringpi.digitalRead(GPIO_ECHO) == 0:
         StartTime = time.time()
         tmpA = tmpA+1
-        if tmpA > 1000000:
+        if tmpA > 1000:
             timeout_flag
             break
 
@@ -46,7 +46,7 @@ def distance(TRIGGER_PIN,ECHO_PIN):
     while wiringpi.digitalRead(GPIO_ECHO) == 1:
         StopTime = time.time()
         tmpB = tmpB+1
-        if tmpB > 1000000:
+        if tmpB > 1000:
             timeout_flag
             break
 

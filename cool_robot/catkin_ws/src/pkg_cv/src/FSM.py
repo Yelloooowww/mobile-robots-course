@@ -55,6 +55,9 @@ class Control(object):
         if len(msg.data) == 5:
             self.goal_index = float( float(msg.data[2])/float(msg.data[0]) )-0.5
             self.goal_area = msg.data[4]
+            if self.goal_area > 32000: 
+                print('force tracking')
+                self.state = "tracking"
         else :
             self.goal_index = None
             self.goal_area = 0
